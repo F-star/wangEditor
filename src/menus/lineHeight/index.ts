@@ -41,7 +41,7 @@ class LineHeight extends DropListMenu implements MenuActive {
     public command(value: string): void {
         let selection = window.getSelection ? window.getSelection() : document.getSelection()
         //允许设置dom
-        const allowArray: string[] = ['P']
+        const allowArray: string[] = ['P', 'LI']
         const editor = this.editor
         let st: string = ''
         //恢复焦点
@@ -189,6 +189,12 @@ class LineHeight extends DropListMenu implements MenuActive {
         st = `<${$(dom).getNodeName().toLowerCase()} style="${styleStr}">${dom.innerHTML}</${$(dom)
             .getNodeName()
             .toLowerCase()}>`
+        // 当是LI时特殊处理
+        if ($(dom).getNodeName() === 'LI') {
+            $(dom).css('line-height', value)
+            editor.selection.collapseRange()
+            return
+        }
 
         //防止BLOCKQUOTE叠加 or IE下导致P嵌套出现误删
         if ($(dom).getNodeName() === 'BLOCKQUOTE' || UA.isIE()) {
@@ -200,7 +206,7 @@ class LineHeight extends DropListMenu implements MenuActive {
 
     /**
      * 遍历dom 获取祖父元素 直到contenteditable属性的div标签
-     *
+     * 对于 li,直接返回即可
      */
     public getDom(dom: HTMLElement): HTMLElement {
         let DOM: HTMLElement = $(dom).elems[0]
@@ -209,6 +215,9 @@ class LineHeight extends DropListMenu implements MenuActive {
         }
         function getParentNode($node: HTMLElement, editor: Editor): HTMLElement {
             const $parent = $($node.parentNode)
+            if ($node.nodeName === 'LI') {
+                return $node
+            }
             if (editor.$textElem.equal($parent)) {
                 return $node
             } else {
