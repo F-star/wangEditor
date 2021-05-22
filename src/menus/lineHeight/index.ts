@@ -60,7 +60,10 @@ class LineHeight extends DropListMenu implements MenuActive {
         let styleStr: string = ''
 
         //选中多行操作
-        if ($selectionElem && editor.$textElem.equal($selectionElem)) {
+        if (
+            ($selectionElem && editor.$textElem.equal($selectionElem)) ||
+            /UL|OL/.test($selectionElem.elems[0].nodeName)
+        ) {
             let isIE = UA.isIE()
             //获取range 开头结束的dom在 祖父元素的下标
             let indexStore: Array<number> = []
@@ -93,6 +96,12 @@ class LineHeight extends DropListMenu implements MenuActive {
                     arrayDom_a.push(d)
                 }
                 i++
+            }
+            if (/UL|OL/.test($selectionElem.elems[0].nodeName)) {
+                arrayDom_a.forEach(item => {
+                    $(item).css('line-height', value)
+                })
+                return
             }
 
             //设置段落选取 全选
@@ -146,6 +155,11 @@ class LineHeight extends DropListMenu implements MenuActive {
             //恢复已选择的选区
             dom = $selectionAll.elems[0]
             this.setRange(dom.children[indexStore[0]], dom.children[indexStore[1]])
+            return
+        }
+
+        if (/UL|OL/.test($selectionElem.elems[0].nodeName)) {
+            console.log('ddddddddddddd')
             return
         }
 
