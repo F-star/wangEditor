@@ -159,7 +159,6 @@ class LineHeight extends DropListMenu implements MenuActive {
         }
 
         if (/UL|OL/.test($selectionElem.elems[0].nodeName)) {
-            console.log('ddddddddddddd')
             return
         }
 
