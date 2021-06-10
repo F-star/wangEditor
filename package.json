@@ -1,5 +1,5 @@
 {
-  "name": "@dmai/wangeditor",
+  "name": "dmai-wangeditor",
   "version": "4.7.1",
   "description": "wangEditor - 轻量级 web 富文本编辑器，配置方便，使用简单，开源免费",
   "homepage": "http://www.wangeditor.com/",
@@ -35,9 +35,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wangeditor-team/wangEditor.git"
+    "url": "git+https://github.com/chenshuhong/wangEditor"
   },
-  "author": "",
+  "author": "chenshuhong@dm-ai.cn",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/wangeditor-team/wangEditor/issues"
