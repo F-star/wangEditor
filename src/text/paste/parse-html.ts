@@ -90,7 +90,11 @@ function genEndHtml(tag: string) {
  * @param filterStyle 是否过滤 style 样式
  * @param ignoreImg 是否忽略 img 标签
  */
-function parseHtml(html: string, filterStyle: boolean = true, ignoreImg: boolean = false): string {
+export function parseHtml(
+    html: string,
+    filterStyle: boolean = true,
+    ignoreImg: boolean = false
+): string {
     let resultArr: string[] = [] // 存储结果，数组形式，最后再 join
 
     // 当前正在处理的标签，以及记录和清除的方法

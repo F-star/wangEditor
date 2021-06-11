@@ -237,3 +237,19 @@ export function hexToRgb(hex: string) {
 
     return `rgb(${r}, ${g}, ${b})`
 }
+
+/**
+ * 格式化html
+ * @param val 粘贴的html
+ * @author liuwei
+ */
+export function formatHtml(val: string) {
+    let pasteText = val
+    // div 全部替换为 p 标签
+    pasteText = pasteText.replace(/<div>/gim, '<p>').replace(/<\/div>/gim, '</p>')
+    // 不允许空行，放在最后
+    pasteText = pasteText.replace(/<p><\/p>/gim, '<p><br></p>')
+    //
+    // 去除''
+    return pasteText.trim()
+}

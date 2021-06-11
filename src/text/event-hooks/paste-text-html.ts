@@ -5,24 +5,9 @@
 
 import Editor from '../../editor/index'
 import { getPasteText, getPasteHtml } from '../paste/paste-event'
-import { isFunction } from '../../utils/util'
+import { isFunction, formatHtml } from '../../utils/util'
 import { urlRegex } from '../../utils/const'
 import { DomElement } from '../../utils/dom-core'
-
-/**
- * 格式化html
- * @param val 粘贴的html
- * @author liuwei
- */
-function formatHtml(val: string) {
-    let pasteText = val
-    // div 全部替换为 p 标签
-    pasteText = pasteText.replace(/<div>/gim, '<p>').replace(/<\/div>/gim, '</p>')
-    // 不允许空行，放在最后
-    pasteText = pasteText.replace(/<p><\/p>/gim, '<p><br></p>')
-    // 去除''
-    return pasteText.trim()
-}
 
 /**
  * 格式化html
