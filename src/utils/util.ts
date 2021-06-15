@@ -2,6 +2,7 @@
  * @description 工具函数集合
  * @author wangfupeng
  */
+import Editor from '../editor'
 
 class NavUA {
     public _ua: string
@@ -252,4 +253,24 @@ export function formatHtml(val: string) {
     //
     // 去除''
     return pasteText.trim()
+}
+
+/**
+ * 清理html
+ * @param val
+ */
+export function clearHtml(val: string) {
+    // div 全部替换为 p 标签
+    val = val.replace(/<div[^>]*>/gim, '<p>').replace(/<\/div[^>]*>/gim, '</p>')
+    const $ = Editor.$
+    const $html = $(`<div>${val}</div>`)
+    $html.find('h1,h2,h3,h4,h5').forEach(ele => {
+        $(ele).html(
+            $(ele)
+                .html()
+                .replace(/<\/?p[^>]*>/g, '')
+        )
+    })
+    console.log($html.html())
+    return $html.html()
 }

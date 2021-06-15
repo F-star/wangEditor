@@ -6,11 +6,10 @@
 import $, { DomElement } from '../utils/dom-core'
 import Editor from '../editor/index'
 import initEventHooks from './event-hooks/index'
-import { UA, throttle, formatHtml } from '../utils/util'
+import { UA, throttle, clearHtml } from '../utils/util'
 import getChildrenJSON, { NodeListType } from './getChildrenJSON'
 import getHtmlByNodeList from './getHtmlByNodeList'
 import { EMPTY_P, EMPTY_P_LAST_REGEX, EMPTY_P_REGEX } from '../utils/const'
-import parseHtml from './paste/parse-html'
 
 /** 按键函数 */
 type KeyBoardHandler = (event: KeyboardEvent) => unknown
@@ -187,8 +186,7 @@ class Text {
             // 内容用 p 标签包裹
             val = `<p>${val}</p>`
         }
-        val = formatHtml(val)
-        val = parseHtml(val)
+        val = clearHtml(val)
         $textElem.html(val)
 
         // 初始化选区，将光标定位到内容尾部
