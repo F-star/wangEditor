@@ -163,7 +163,8 @@ function createShowHideFn(editor: Editor) {
                     //获取新生成的table 判断是否是最后一列被删除 是 删除整个table
                     const newDom = operatingEvent.DeleteCol($(htmlStr), index)
                     // 获取子节点的数量
-                    const tdLength: number = newDom.elems[0].children[0].children[0].children.length
+                    const tdLength: number = (newDom.elems[0].lastElementChild as Element)
+                        .children[0].children.length
 
                     //生成新的table
                     let newdom: string = ''
@@ -175,7 +176,7 @@ function createShowHideFn(editor: Editor) {
                     if (tdLength === 0) {
                         newdom = EMPTY_P
                     } else {
-                        newdom = getnode.getTableHtml(newDom.elems[0])
+                        newdom = getnode.getTableHtml(newDom.elems[0]) // TODO: 修改 colgroup 的内容
                     }
                     newdom = _isEmptyP($node, newdom)
                     editor.cmd.do('insertHTML', newdom)

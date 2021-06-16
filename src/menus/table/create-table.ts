@@ -46,17 +46,22 @@ class CreateTable {
             colStr = ''
             for (let j = 0; j < colValue; j++) {
                 if (i === 0) {
-                    colStr = colStr + '<th></th>'
+                    colStr = colStr + '<th><br></th>'
                 } else {
-                    colStr = colStr + '<td></td>'
+                    colStr = colStr + '<td><br></td>'
                 }
             }
             rowStr = rowStr + '<tr>' + colStr + '</tr>'
         }
+
+        let colgroupContent: string = ''
+        for (let j = 0; j < colValue; j++) {
+            colgroupContent += `<col></col>`
+        }
         const tableDom =
-            `<table border="0" width="100%" cellpadding="0" cellspacing="0"><tbody>` +
-            rowStr +
-            `</tbody></table>${EMPTY_P}`
+            '<table border="0" cellpadding="0" cellspacing="0">' +
+            `<colgroup>${colgroupContent}</colgroup>` +
+            `<tbody>${rowStr}</tbody></table>${EMPTY_P}`
         return tableDom
     }
 }

@@ -16,6 +16,7 @@ function ProcessingRow($node: DomElement, _index: number): DomElement {
     let tr = document.createElement('tr')
     for (let i = 0; i < childrenLength; i++) {
         const td = document.createElement('td')
+        td.innerHTML = '<br>'
         tr.appendChild(td)
     }
     //插入集合中
