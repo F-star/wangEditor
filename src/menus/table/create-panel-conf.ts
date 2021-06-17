@@ -39,9 +39,9 @@ export default function (editor: Editor): PanelConf {
             tpl: `<div>
                     <div class="w-e-table">
                         <span>${t('创建')}</span>
-                        <input id="${rowId}"  type="text" class="w-e-table-input" value="5"/></td>
+                        <input id="${rowId}"  type="text" class="w-e-table-input" value="2"/></td>
                         <span>${t(`${i18nPrefix}行`)}</span>
-                        <input id="${colId}" type="text" class="w-e-table-input" value="5"/></td>
+                        <input id="${colId}" type="text" class="w-e-table-input" value="2"/></td>
                         <span>${
                             t(`${i18nPrefix}列`) + t(`${i18nPrefix}的`) + t(`${i18nPrefix}表格`)
                         }</span>

@@ -6,6 +6,7 @@
 import { EMPTY_P } from '../../utils/const'
 import Editor from '../../editor/index'
 import $ from '../../utils/dom-core'
+import { defaultRowWidth, defaultTableAttrs } from '../../config/table'
 
 class CreateTable {
     private editor: Editor
@@ -56,10 +57,11 @@ class CreateTable {
 
         let colgroupContent: string = ''
         for (let j = 0; j < colValue; j++) {
-            colgroupContent += `<col></col>`
+            colgroupContent += `<col style="width: ${defaultRowWidth};"/>`
         }
+
         const tableDom =
-            '<table border="0" cellpadding="0" cellspacing="0">' +
+            `<table ${defaultTableAttrs}>` +
             `<colgroup>${colgroupContent}</colgroup>` +
             `<tbody>${rowStr}</tbody></table>${EMPTY_P}`
         return tableDom

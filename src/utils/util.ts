@@ -2,6 +2,7 @@
  * @description 工具函数集合
  * @author wangfupeng
  */
+import { defaultRowWidth } from '../config/table'
 import Editor from '../editor'
 
 class NavUA {
@@ -250,7 +251,13 @@ export function formatHtml(val: string) {
     pasteText = pasteText.replace(/<div>/gim, '<p>').replace(/<\/div>/gim, '</p>')
     // 不允许空行，放在最后
     pasteText = pasteText.replace(/<p><\/p>/gim, '<p><br></p>')
-    //
+    // table 处理
+    // FIXME: 粘贴的 table 没有 colgroup 的情况...样式会出大问题
+    pasteText = pasteText
+        // .replace(/<table>/gim, `<table ${defaultTableAttrs}>`)
+        .replace(/<col\/>/gim, `<col style="width: ${defaultRowWidth}"/>`)
+        .replace(/<td>(<p>\n<\/p>)?<\/td>/gim, '<td><br/></td>')
+
     // 去除''
     return pasteText.trim()
 }

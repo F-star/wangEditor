@@ -5,6 +5,7 @@
 
 import $ from '../../../../utils/dom-core'
 import Editor from '../../../../editor/index'
+import { defaultTableAttrs } from '../../../../config/table'
 
 class getNode {
     public editor: Editor
@@ -67,9 +68,7 @@ class getNode {
      * @param $node
      */
     public getTableHtml($node: HTMLElement): string {
-        const htmlStr = `<table border="0" cellpadding="0" cellspacing="0">${$(
-            $node
-        ).html()}</table>`
+        const htmlStr = `<table ${defaultTableAttrs}>${$($node).html()}</table>`
         return htmlStr
     }
 }

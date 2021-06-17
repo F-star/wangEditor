@@ -1,4 +1,5 @@
 import $, { DomElement } from '../../../../utils/dom-core'
+import { defaultRowWidth } from '../../../../config/table'
 
 /**
  * 处理新添加行
@@ -32,6 +33,15 @@ function ProcessingRow($node: DomElement, _index: number): DomElement {
  * @param _index 列的inde
  */
 function ProcessingCol($node: DomElement, _index: number): DomElement {
+    // 新增对应的 `colgroup > col`
+    const colgroup = $node.elems[0].children[0]
+    if (colgroup.nodeName === 'COLGROUP') {
+        const cols: HTMLElement[] = Array.prototype.slice.apply(colgroup.children)
+        const newCol = document.createElement('col')
+        newCol.style.width = defaultRowWidth
+        cols.splice(_index, 0, newCol)
+        removeAndInsertAction(colgroup, cols)
+    }
     //执行获取tbody节点
     let $dom = generateDomAction($node)
     //取出所有的行
@@ -87,6 +97,14 @@ function DeleteRow($node: DomElement, _index: number): DomElement {
  * @param _index
  */
 function DeleteCol($node: DomElement, _index: number): DomElement {
+    // 删除对应的 `colgroup > col`
+    const colgroup = $node.elems[0].children[0]
+    if (colgroup.nodeName === 'COLGROUP') {
+        const cols: HTMLElement[] = Array.prototype.slice.apply(colgroup.children)
+        cols.splice(_index, 1)
+        removeAndInsertAction(colgroup, cols)
+    }
+
     //执行获取tbody节点
     let $dom = generateDomAction($node)
     //取出所有的行
