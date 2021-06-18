@@ -571,6 +571,31 @@ class Text {
             tableClickEvents.forEach(fn => fn($dom as DomElement, e))
         })
 
+        // table mousemove 事件
+        $textElem.on('mousemove', (e: MouseEvent) => {
+            // console.log('move')
+            function getNearestTable(elem: HTMLElement | null) {
+                // eslint-disable-next-line no-constant-condition
+                while (true) {
+                    if (elem === null || elem === $textElem.elems[0]) return null
+                    if (elem.tagName === 'TABLE') return elem
+                    elem = elem.parentElement
+                }
+            }
+
+            const target = e.target as HTMLElement
+            const table = getNearestTable(target)
+            if (!table) {
+                // console.log('outer table')
+                return
+            }
+
+            console.log(e)
+            // console.log('inner table')
+            // TODO: 计算左偏移量
+            //
+        })
+
         // enter 键 down
         $textElem.on('keydown', (e: KeyboardEvent) => {
             if (e.keyCode !== 13) return

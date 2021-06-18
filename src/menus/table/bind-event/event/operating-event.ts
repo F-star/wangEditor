@@ -63,6 +63,7 @@ function ProcessingCol($node: DomElement, _index: number): DomElement {
                 ? document.createElement('td')
                 : document.createElement('th')
         // let td = document.createElement('td')
+        td.innerHTML = '<br/>'
         cArray.splice(_index + 1, 0, td)
         //插入新的子节点
         for (let j = 0; j < cArray.length; j++) {

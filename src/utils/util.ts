@@ -2,7 +2,7 @@
  * @description 工具函数集合
  * @author wangfupeng
  */
-import { defaultRowWidth } from '../config/table'
+import { defaultRowWidth, defaultTableAttrs } from '../config/table'
 import Editor from '../editor'
 
 class NavUA {
@@ -254,12 +254,51 @@ export function formatHtml(val: string) {
     // table 处理
     // FIXME: 粘贴的 table 没有 colgroup 的情况...样式会出大问题
     pasteText = pasteText
-        // .replace(/<table>/gim, `<table ${defaultTableAttrs}>`)
+        .replace(/<table>/gim, `<table ${defaultTableAttrs}>`)
         .replace(/<col\/>/gim, `<col style="width: ${defaultRowWidth}"/>`)
         .replace(/<td>(<p>\n<\/p>)?<\/td>/gim, '<td><br/></td>')
-
+    pasteText = addColgroupIfAbsent(pasteText)
     // 去除''
     return pasteText.trim()
+}
+
+/**
+ * 给不存在 colgroup 元素的 table 添加 colgroup
+ * @param domStr 粘贴的html
+ * @author huanghao
+ */
+function addColgroupIfAbsent(domStr: string): string {
+    const realDom = document.createElement('div')
+    realDom.innerHTML = domStr
+    // 遍历 dom。对没有 colgroup 的 table 添加 colgroup
+    const tables = Array.from(realDom.getElementsByTagName('table'))
+    tables.forEach(table => {
+        const children = Array.from(table.children)
+        const hasColgroup = children.some(elem => elem.tagName === 'COLGROUP')
+        if (hasColgroup) {
+            return domStr
+        }
+
+        let rowCount = 0
+        // 检测有几列
+        const tbody = children.find(elem => elem.tagName === 'TBODY')
+        if (tbody) {
+            const tr = tbody.firstElementChild
+            if (tr) {
+                rowCount = tr.childElementCount
+            }
+        }
+
+        // 添加 rowCount 个 col
+        let colContent = ''
+        for (let i = 0; i < rowCount; i++) {
+            colContent += `<col style="width: ${defaultRowWidth}">`
+        }
+        const colgroup = document.createElement('colgroup')
+        colgroup.innerHTML = colContent
+        table.insertBefore(colgroup, table.firstElementChild)
+    })
+    return realDom.innerHTML
 }
 
 /**
