@@ -59,6 +59,20 @@ export function createShowHideFn(editor: Editor) {
                 },
             },
             {
+                $elem: $('<span>自定义百分比</span>'),
+                onClick: (editor: Editor, $node: DomElement) => {
+                    const value = window.prompt('请输入百分比')
+                    const num = parseFloat(value as string)
+
+                    if (num && num > 0) {
+                        $node.attr('width', num + '%')
+                        $node.removeAttr('height')
+                    }
+                    // 返回 true，表示执行完之后，隐藏 tooltip。否则不隐藏。
+                    return true
+                },
+            },
+            {
                 $elem: $(`<span>${t('重置')}</span>`),
                 onClick: (editor: Editor, $node: DomElement) => {
                     $node.removeAttr('width')
