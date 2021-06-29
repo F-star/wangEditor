@@ -70,7 +70,7 @@ export function createShowHideFn(editor: Editor) {
                     const num = parseFloat(value as string)
 
                     if (num && num > 0) {
-                        $node.attr('width', value + '%')
+                        $node.attr('width', num + '%')
                         $node.removeAttr('height')
                     }
                     // 返回 true，表示执行完之后，隐藏 tooltip。否则不隐藏。
