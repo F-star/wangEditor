@@ -10,6 +10,7 @@ import { UA, throttle, clearHtml } from '../utils/util'
 import getChildrenJSON, { NodeListType } from './getChildrenJSON'
 import getHtmlByNodeList from './getHtmlByNodeList'
 import { EMPTY_P, EMPTY_P_LAST_REGEX, EMPTY_P_REGEX } from '../utils/const'
+import { minRowWidth } from '../config/table'
 
 /** 按键函数 */
 type KeyBoardHandler = (event: KeyboardEvent) => unknown
@@ -59,6 +60,84 @@ type TextEventHooks = {
     splitLineEvents: ((e: DomElement) => void)[]
     /** 视频点击事件 */
     videoClickEvents: ((e: DomElement) => void)[]
+}
+
+const OFFSET = 5
+// let enbleCtrlLineDrag = false
+let ctrlLineDragging = false
+let ctrlLineIndex = -1
+
+function getNearestTable(elem: HTMLElement | null, root: HTMLElement | null) {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        if (elem === null || elem === root) return null
+        if (elem.tagName === 'TABLE') return elem
+        elem = elem.parentElement
+    }
+}
+
+function ctrlLine(parent: HTMLElement, left: number | undefined, top?: number, height?: number) {
+    const lineName = 'data-col-width-ctrl-line'
+    const children = Array.prototype.slice.call(parent.children)
+    let line = children.find(ch => ch.hasAttribute(lineName)) as HTMLElement
+
+    if (line == null) {
+        line = document.createElement('div')
+        line.style.width = '2px'
+        line.style.height = '100%'
+        line.style.backgroundColor = 'rgba(40, 115, 241, .5)'
+        line.style.position = 'absolute'
+        line.style.left = '0'
+        line.style.cursor = 'col-resize'
+        line.style.pointerEvents = 'none'
+        line.setAttribute(lineName, '')
+        parent.appendChild(line)
+    }
+    line.style.top = top === undefined ? '0' : top + 'px'
+    line.style.height = height === undefined ? '100%' : height + 'px'
+    if (left === undefined) {
+        left = -9999
+        // enbleCtrlLineDrag = false
+    } else {
+        // enbleCtrlLineDrag = true
+        // parent.style.pointerEvents = 'none'
+    }
+    line.style.transform = `translateX(${left}px)`
+}
+
+// 获取所有 col 的位置
+function getAllColPos(table: Element) {
+    const colgroup = table.querySelector('colgroup') as HTMLElement
+    const children = colgroup.children
+    const widths: number[] = []
+    for (let i = 0; i < children.length; i++) {
+        const ch = children[i] as HTMLElement
+        const w = ch.style.width
+        if (w) {
+            widths.push(parseFloat(w))
+        }
+    }
+    const poss: number[] = []
+    widths.reduce((prev, curr) => {
+        curr = prev + curr
+        poss.push(curr)
+        return curr
+    }, 0)
+    return poss
+}
+
+function getNearestPos(poss: number[], pos: number, offset: number) {
+    // for (let n of poss) {
+    for (let i = 0; i < poss.length; i++) {
+        const n = poss[i]
+        if (Math.abs(pos - n) <= offset) {
+            return {
+                nearestPos: n,
+                index: i,
+            }
+        }
+    }
+    return { nearestPos: undefined, index: undefined }
 }
 
 class Text {
@@ -571,103 +650,83 @@ class Text {
             tableClickEvents.forEach(fn => fn($dom as DomElement, e))
         })
 
+        $textElem.on('mousedown', (e: MouseEvent) => {
+            const target = e.target as HTMLElement
+            const table = getNearestTable(target, $textElem.elems[0])
+
+            const container = $textElem.elems[0].parentElement as HTMLElement
+            const rect = container.getBoundingClientRect()
+            const x = e.clientX - rect.left
+            // const tableX = e.clientX - table.getBoundingClientRect().left
+            if (table) {
+                const poss = getAllColPos(table)
+                const { nearestPos } = getNearestPos(poss, x - rect.left, OFFSET)
+                if (nearestPos != undefined) {
+                    ctrlLineDragging = true
+                }
+            }
+        })
+
         // table mousemove 事件
         $textElem.on('mousemove', (e: MouseEvent) => {
-            // console.log('move')
-            function getNearestTable(elem: HTMLElement | null) {
-                // eslint-disable-next-line no-constant-condition
-                while (true) {
-                    if (elem === null || elem === $textElem.elems[0]) return null
-                    if (elem.tagName === 'TABLE') return elem
-                    elem = elem.parentElement
-                }
-            }
-
-            // 获取所有 col 的位置
-            function getAllColPos(table: Element) {
+            function setColWidth(table: HTMLElement, index: number, width: number) {
                 const colgroup = table.querySelector('colgroup') as HTMLElement
-                const children = colgroup.children
-                const widths: number[] = []
-                for (let i = 0; i < children.length; i++) {
-                    const ch = children[i] as HTMLElement
-                    const w = ch.style.width
-                    if (w) {
-                        widths.push(parseFloat(w))
-                    }
+                const cols = colgroup.querySelectorAll('col')
+                if (index < cols.length) {
+                    const col = cols[index]
+                    col.style.width = width + 'px'
                 }
-                const poss: number[] = []
-                widths.reduce((prev, curr) => {
-                    curr = prev + curr
-                    poss.push(curr)
-                    return curr
-                }, 0)
-                return poss
-            }
-
-            function getNearestPos(poss: number[], pos: number, offset: number) {
-                for (let n of poss) {
-                    if (Math.abs(pos - n) <= offset) {
-                        return n
-                    }
-                }
-                return undefined
-            }
-
-            function ctrlLine(left: number | undefined) {
-                const parent = $textElem.elems[0].parentElement as Element
-                const lineName = 'data-col-width-ctrl-line'
-
-                const children = Array.prototype.slice.call(parent.children)
-                let line = children.find(ch => ch.hasAttribute(lineName)) as HTMLElement
-
-                if (line == null) {
-                    line = document.createElement('div')
-                    line.style.width = '3px'
-                    line.style.height = '100%'
-                    line.style.backgroundColor = 'rgba(0, 0, 0, .5)'
-                    line.style.position = 'absolute'
-                    line.style.top = '0'
-                    line.style.left = '0'
-                    line.style.cursor = 'col-resize'
-                    line.setAttribute(lineName, '')
-                    parent.appendChild(line)
-
-                    line.addEventListener(
-                        'click',
-                        function () {
-                            console.log('line click')
-                        },
-                        false
-                    )
-                }
-                if (left === undefined) left = -9999
-                line.style.transform = `translateX(${left}px)`
             }
 
             const target = e.target as HTMLElement
-            const table = getNearestTable(target)
+            const table = getNearestTable(target, $textElem.elems[0])
+            const container = $textElem.elems[0].parentElement as HTMLElement
             if (!table) {
-                ctrlLine(undefined)
+                ctrlLine(container, undefined)
                 return
             }
 
             // 鼠标移动到 table 内部
-
-            const el = $textElem.elems[0].parentElement as Element
-            const rect = el.getBoundingClientRect()
+            const rect = container.getBoundingClientRect()
             const x = e.clientX - rect.left
+            const tableBox = table.getBoundingClientRect()
+            const tableX = e.clientX - tableBox.left
             // const y = e.clientY - rect.top
             // console.log({ x, y })
 
             const poss = getAllColPos(table)
+            if (ctrlLineDragging) {
+                // 拖拽控制线，调整列宽。
+                ctrlLine(container, x, tableBox.top - rect.top, tableBox.height)
+                const leftPos = poss[ctrlLineIndex - 1] || 0
+                const width = Math.max(tableX - leftPos, minRowWidth)
 
-            const OFFSET = 5
-            const nearestPos = getNearestPos(poss, x - rect.left, OFFSET)
-            if (nearestPos !== undefined) {
-                console.log(nearestPos)
-                ctrlLine(nearestPos + rect.left)
+                setColWidth(table, ctrlLineIndex, width)
             } else {
-                ctrlLine(undefined)
+                const { nearestPos, index } = getNearestPos(poss, x - rect.left, OFFSET)
+                if (index != undefined) ctrlLineIndex = index
+                if (nearestPos !== undefined) {
+                    ctrlLine(
+                        container,
+                        nearestPos + rect.left,
+                        tableBox.top - rect.top,
+                        tableBox.height
+                    )
+                } else {
+                    // 不可拖拽
+                    ctrlLine(container, undefined)
+                }
+            }
+        })
+
+        $textElem.on('mouseup', (e: KeyboardEvent) => {
+            if (ctrlLineDragging) {
+                // enbleCtrlLineDrag = false
+                ctrlLineIndex = -1
+                ctrlLineDragging = false
+                const container = $textElem.elems[0].parentElement as HTMLElement
+                ctrlLine(container, undefined)
+                // 更新 width。
             }
         })
 
