@@ -6,7 +6,7 @@
 import $, { DomElement } from '../utils/dom-core'
 import Editor from '../editor/index'
 import initEventHooks from './event-hooks/index'
-import { UA, throttle, clearHtml } from '../utils/util'
+import { UA, throttle, clearHtml, addColgroupIfAbsent } from '../utils/util'
 import getChildrenJSON, { NodeListType } from './getChildrenJSON'
 import getHtmlByNodeList from './getHtmlByNodeList'
 import { EMPTY_P, EMPTY_P_LAST_REGEX, EMPTY_P_REGEX } from '../utils/const'
@@ -76,6 +76,7 @@ function getNearestTable(elem: HTMLElement | null, root: HTMLElement | null) {
     }
 }
 
+// 绘制列宽控制线
 function ctrlLine(parent: HTMLElement, left: number | undefined, top?: number, height?: number) {
     const lineName = 'data-col-width-ctrl-line'
     const children = Array.prototype.slice.call(parent.children)
@@ -127,7 +128,6 @@ function getAllColPos(table: Element) {
 }
 
 function getNearestPos(poss: number[], pos: number, offset: number) {
-    // for (let n of poss) {
     for (let i = 0; i < poss.length; i++) {
         const n = poss[i]
         if (Math.abs(pos - n) <= offset) {
@@ -265,6 +265,8 @@ class Text {
             // 内容用 p 标签包裹
             val = `<p>${val}</p>`
         }
+
+        val = addColgroupIfAbsent(val) // 处理 table
         val = clearHtml(val)
         $textElem.html(val)
 
@@ -654,13 +656,11 @@ class Text {
             const target = e.target as HTMLElement
             const table = getNearestTable(target, $textElem.elems[0])
 
-            const container = $textElem.elems[0].parentElement as HTMLElement
-            const rect = container.getBoundingClientRect()
-            const x = e.clientX - rect.left
-            // const tableX = e.clientX - table.getBoundingClientRect().left
             if (table) {
+                const tableBox = table.getBoundingClientRect()
+                const tableX = e.clientX - tableBox.left // 光标 相对 table 的左偏移值
                 const poss = getAllColPos(table)
-                const { nearestPos } = getNearestPos(poss, x - rect.left, OFFSET)
+                const { nearestPos } = getNearestPos(poss, tableX, OFFSET)
                 if (nearestPos != undefined) {
                     ctrlLineDragging = true
                 }
@@ -688,11 +688,9 @@ class Text {
 
             // 鼠标移动到 table 内部
             const rect = container.getBoundingClientRect()
-            const x = e.clientX - rect.left
+            const x = e.clientX - rect.left // 光标 相对 编辑器容器 的左偏移值
             const tableBox = table.getBoundingClientRect()
-            const tableX = e.clientX - tableBox.left
-            // const y = e.clientY - rect.top
-            // console.log({ x, y })
+            const tableX = e.clientX - tableBox.left // 光标 相对 table 的左偏移值
 
             const poss = getAllColPos(table)
             if (ctrlLineDragging) {
@@ -703,12 +701,12 @@ class Text {
 
                 setColWidth(table, ctrlLineIndex, width)
             } else {
-                const { nearestPos, index } = getNearestPos(poss, x - rect.left, OFFSET)
+                const { nearestPos, index } = getNearestPos(poss, tableX, OFFSET)
                 if (index != undefined) ctrlLineIndex = index
                 if (nearestPos !== undefined) {
                     ctrlLine(
                         container,
-                        nearestPos + rect.left,
+                        nearestPos + (tableBox.left - rect.left),
                         tableBox.top - rect.top,
                         tableBox.height
                     )
